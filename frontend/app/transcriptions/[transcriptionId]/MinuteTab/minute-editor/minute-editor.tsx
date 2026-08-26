@@ -5,10 +5,11 @@ import { GuardrailResponseComponent } from '@/app/transcriptions/[transcriptionI
 import { MinuteVersionSelect } from '@/app/transcriptions/[transcriptionId]/MinuteTab/minute-editor/minute-version-select'
 import { NewMinuteDialog } from '@/app/transcriptions/[transcriptionId]/MinuteTab/NewMinuteDialog'
 import { Button } from '@/components/ui/button'
+import { useBannerStore } from '@/stores/use-banner-store'
+import { ReviewGuardButton } from '@/components/documents/review-guard-button'
 import { citationRegex, citationRegexWithSpace } from '@/lib/citationRegex'
 import {
   Minute,
-  MinuteListItem,
   MinuteVersionResponse,
   TranscriptionGetResponse,
 } from '@/lib/client'
@@ -20,7 +21,8 @@ import {
 } from '@/lib/client/@tanstack/react-query.gen'
 import convertAIMinutesToWordDoc from '@/lib/download-word-doc'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { FilePenLine, FileQuestion, FileX2, Loader2, Undo } from 'lucide-react'
+import { AiEditPopover } from '@/app/transcriptions/[transcriptionId]/MinuteTab/minute-editor/ai-edit-popover'
+import { FilePenLine, FileX2, Loader2, Undo } from 'lucide-react'
 import posthog from 'posthog-js'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
@@ -29,8 +31,7 @@ import {
   GovukButtonGroup,
   GovukNotificationBanner,
 } from '@/components/govuk'
-import { AiEditPopover } from '@/app/transcriptions/[transcriptionId]/MinuteTab/minute-editor/ai-edit-popover'
-import CopyButton from '@/components/ui/copy-button'
+import { copyHTML } from '@/lib/utils'
 
 type MinuteEditorForm = {
   html: string
@@ -45,6 +46,7 @@ export function MinuteEditor({
 }) {
   const [version, setVersion] = useState<string | undefined>(undefined)
   const [hideCitations, setHideCitations] = useState(false)
+  const { setBanner } = useBannerStore()
   const {
     data: minuteVersions = [],
     isLoading,
@@ -128,23 +130,51 @@ export function MinuteEditor({
     },
     [minute.id, minuteVersion?.html_content, onSuccess, saveEdit]
   )
-  const handleWordDocDownload = useCallback(() => {
-    posthog.capture('minutes_downloaded', {
-      format: 'word',
-      version_id: minuteVersion?.id,
-    })
 
-    convertAIMinutesToWordDoc(
-      htmlContent,
-      transcription.dialogue_entries || [],
-      transcription.title || 'minutes.docx'
-    )
-  }, [
-    htmlContent,
-    minuteVersion?.id,
-    transcription.dialogue_entries,
-    transcription.title,
-  ])
+  const handleCopyDocument = () => {
+    try {
+      copyHTML(contentToCopy)
+      setBanner({
+        variant: 'success',
+        title: 'Success',
+        message: `'${minute.template_name}' copied to clipboard`,
+      })
+      posthog.capture('editor_content_copied', {
+        contentLength: contentToCopy.length,
+      })
+    } catch {
+      setBanner({
+        variant: 'important',
+        title: 'Error',
+        message: 'Error copying document.',
+      })
+    }
+  }
+
+  const handleWordDocDownload = () => {
+    try {
+      convertAIMinutesToWordDoc(
+        htmlContent,
+        transcription.dialogue_entries || [],
+        transcription.title || 'minutes.docx'
+      )
+      setBanner({
+        variant: 'success',
+        title: 'Success',
+        message: `'${minute.template_name}' downloaded`,
+      })
+      posthog.capture('minutes_downloaded', {
+        format: 'word',
+        version_id: minuteVersion?.id,
+      })
+    } catch {
+      setBanner({
+        variant: 'important',
+        title: 'Error',
+        message: 'Error downloading document.',
+      })
+    }
+  }
 
   if (isLoading) {
     return (
@@ -244,13 +274,15 @@ export function MinuteEditor({
             Manual edit
           </GovukButton>
         )}
-        <GovukButton onClick={handleWordDocDownload} variant="secondary">
-          Download document
-        </GovukButton>
-        <CopyButton
-          textToCopy={contentToCopy}
-          posthogEvent={'editor_content_copied'}
-          label="Copy document"
+        <ReviewGuardButton
+          onConfirm={handleCopyDocument}
+          action="copy"
+          subject="document"
+        />
+        <ReviewGuardButton
+          onConfirm={handleWordDocDownload}
+          action="download"
+          subject="document"
         />
         {hasCitations && (
           <GovukButton
