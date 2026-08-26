@@ -213,21 +213,6 @@ export default function TranscriptionPage(props: {
         <GovukTabs.Panel id="transcript" label="Transcript">
           <TranscriptionTab
             transcription={transcription}
-            onTranscriptCopied={() =>
-              setBanner({
-                variant: 'success',
-                title: 'Success',
-                message: 'Transcript copied to clipboard.',
-              })
-            }
-            onTranscriptDownloaded={() =>
-              setBanner({
-                variant: 'success',
-                title: 'Success',
-                message: 'Transcript downloaded.',
-              })
-            }
-            onDismissBanner={clearBanner}
             onLineEditError={handleLineEditError}
             onEditModeChange={setIsTranscriptEditing}
           />

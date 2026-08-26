@@ -50,14 +50,12 @@ const cloneEntries = (entries: DialogueEntry[]) =>
 
 export function TranscriptionTab({
   transcription,
-  onDismissBanner,
   onLineEditError,
   onEditModeChange,
 }: {
   transcription: TranscriptionGetResponse
   onLineEditError: (error: string | null) => void
   onEditModeChange?: (isEditing: boolean) => void
-  onDismissBanner: () => void
 }) {
   const methods = useForm<DialogueEntryForm>({
     defaultValues: { entries: transcription.dialogue_entries || [] },
@@ -401,7 +399,7 @@ export function TranscriptionTab({
         <form>
           <GovukButtonGroup
             className="govuk-!-margin-bottom-4"
-            onClick={onDismissBanner}
+            onClick={clearBanner}
           >
             <SpeakerEditor
               src={hasRecordings ? recordings[0].url : undefined}
