@@ -85,9 +85,6 @@ const renderTab = (transcription: TranscriptionGetResponse) =>
     <TranscriptionTab
       transcription={transcription}
       onLineEditError={onLineEditErrorMock}
-      onTranscriptCopied={() => {}}
-      onTranscriptDownloaded={() => {}}
-      onDismissBanner={() => {}}
     />
   )
 
