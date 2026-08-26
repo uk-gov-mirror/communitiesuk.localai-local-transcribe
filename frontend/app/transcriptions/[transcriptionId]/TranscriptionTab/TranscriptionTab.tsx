@@ -50,8 +50,6 @@ const cloneEntries = (entries: DialogueEntry[]) =>
 
 export function TranscriptionTab({
   transcription,
-  onTranscriptCopied,
-  onTranscriptDownloaded,
   onDismissBanner,
   onLineEditError,
   onEditModeChange,
@@ -59,8 +57,6 @@ export function TranscriptionTab({
   transcription: TranscriptionGetResponse
   onLineEditError: (error: string | null) => void
   onEditModeChange?: (isEditing: boolean) => void
-  onTranscriptCopied: () => void
-  onTranscriptDownloaded: () => void
   onDismissBanner: () => void
 }) {
   const methods = useForm<DialogueEntryForm>({
