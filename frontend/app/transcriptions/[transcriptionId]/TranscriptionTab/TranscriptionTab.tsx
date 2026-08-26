@@ -2,20 +2,21 @@ import { SpeakerEditor } from '@/app/transcriptions/[transcriptionId]/Transcript
 import { SpeakerNamePopover } from '@/app/transcriptions/[transcriptionId]/TranscriptionTab/SpeakerNamePopover'
 import { TranscriptionTextArea } from '@/app/transcriptions/[transcriptionId]/TranscriptionTab/TranscriptionTextArea'
 import { GovukButton, GovukButtonGroup } from '@/components/govuk'
-import { CopyTranscriptButton } from '@/components/recordings/copy-transcript-button'
-import { DownloadTranscriptButton } from '@/components/recordings/download-transcript-button'
+import { ReviewGuardButton } from '@/components/review-guard/review-guard-button'
+import { downloadTranscriptDoc } from '@/lib/download-word-doc'
 import {
   useUpdateTranscription,
   useUpdateTranscriptionSpeakers,
 } from '@/hooks/use-update-transcription-speakers'
 import { DialogueEntry, TranscriptionGetResponse } from '@/lib/client'
 import { getRecordingsForTranscriptionTranscriptionsTranscriptionIdRecordingsGetOptions } from '@/lib/client/@tanstack/react-query.gen'
-import { cn } from '@/lib/utils'
+import { cn, formatDate, copyHTML } from '@/lib/utils'
 import { useBannerStore } from '@/stores/use-banner-store'
 import { useQuery } from '@tanstack/react-query'
 import { Play } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form'
+import posthog from 'posthog-js'
 
 export type DialogueEntryForm = {
   entries: DialogueEntry[]
@@ -356,6 +357,48 @@ export function TranscriptionTab({
     onEditModeChange?.(false)
   }
 
+  const handleDownloadTranscript = async (entries: DialogueEntry[]) => {
+    const createdDatetime = recordings?.[0]?.created_datetime
+    const formatted = createdDatetime ? formatDate(createdDatetime) : null
+    const timeStamp = formatted ? `-${formatted}` : ''
+    const fileName = `transcript${timeStamp}.docx`
+
+    try {
+      await downloadTranscriptDoc(entries, fileName)
+      setBanner({
+        variant: 'success',
+        title: 'Success',
+        message: 'Transcript downloaded',
+      })
+    } catch {
+      setBanner({
+        variant: 'important',
+        title: 'Error',
+        message: 'Error downloading transcript.',
+      })
+    }
+  }
+
+  const handleCopyTranscript = async () => {
+    try {
+      await copyHTML(transcriptionString)
+      setBanner({
+        variant: 'success',
+        title: 'Success',
+        message: `'${transcription.title}' copied to clipboard`,
+      })
+      posthog.capture('editor_content_copied', {
+        contentLength: transcriptionString.length,
+      })
+    } catch {
+      setBanner({
+        variant: 'important',
+        title: 'Error',
+        message: 'Error copying document.',
+      })
+    }
+  }
+
   return (
     <div>
       <FormProvider {...methods}>
@@ -380,18 +423,19 @@ export function TranscriptionTab({
             >
               Edit transcript
             </GovukButton>
-            <CopyTranscriptButton
-              textToCopy={transcriptionString}
-              onSuccess={onTranscriptCopied}
+            <ReviewGuardButton
+              onConfirm={handleCopyTranscript}
               disabled={isLineEditMode}
+              action="copy"
+              subject="transcript"
             />
 
             {fields.length > 0 && (
-              <DownloadTranscriptButton
-                getEntries={() => getValues('entries')}
-                onSuccess={onTranscriptDownloaded}
-                createdDatetime={recordings?.[0]?.created_datetime}
+              <ReviewGuardButton
+                onConfirm={() => handleDownloadTranscript(getValues('entries'))}
                 disabled={isLineEditMode}
+                action="download"
+                subject="transcript"
               />
             )}
           </GovukButtonGroup>

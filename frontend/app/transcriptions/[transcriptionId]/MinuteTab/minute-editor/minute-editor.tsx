@@ -6,7 +6,7 @@ import { MinuteVersionSelect } from '@/app/transcriptions/[transcriptionId]/Minu
 import { NewMinuteDialog } from '@/app/transcriptions/[transcriptionId]/MinuteTab/NewMinuteDialog'
 import { Button } from '@/components/ui/button'
 import { useBannerStore } from '@/stores/use-banner-store'
-import { ReviewGuardButton } from '@/components/documents/review-guard-button'
+import { ReviewGuardButton } from '@/components/review-guard/review-guard-button'
 import { citationRegex, citationRegexWithSpace } from '@/lib/citationRegex'
 import {
   Minute,
@@ -131,9 +131,9 @@ export function MinuteEditor({
     [minute.id, minuteVersion?.html_content, onSuccess, saveEdit]
   )
 
-  const handleCopyDocument = () => {
+  const handleCopyDocument = async () => {
     try {
-      copyHTML(contentToCopy)
+      await copyHTML(contentToCopy)
       setBanner({
         variant: 'success',
         title: 'Success',

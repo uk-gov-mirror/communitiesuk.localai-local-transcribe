@@ -1,7 +1,7 @@
 'use client'
 
 import { GovukButton } from '@/components/govuk'
-import { ReviewGuardModal } from '@/components/documents/review-guard-modal'
+import { ReviewGuardModal } from '@/components/review-guard/review-guard-modal'
 import { useState } from 'react'
 
 interface ReviewGuardButtonProps {
