@@ -31,7 +31,7 @@ import {
   GovukButtonGroup,
   GovukNotificationBanner,
 } from '@/components/govuk'
-import { copyHTML } from '@/lib/utils'
+import { copyHTML, formatDate } from '@/lib/utils'
 
 type MinuteEditorForm = {
   html: string
@@ -156,7 +156,9 @@ export function MinuteEditor({
       convertAIMinutesToWordDoc(
         htmlContent,
         transcription.dialogue_entries || [],
-        transcription.title || 'minutes.docx'
+        transcription.date_of_recording
+          ? `${minute.template_name} ${formatDate(transcription.date_of_recording)}`
+          : 'minutes.docx'
       )
       setBanner({
         variant: 'success',
