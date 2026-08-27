@@ -102,15 +102,46 @@ export function preprocessHtml(
 </html>`
 }
 
+async function getNewFileHandle(fileName: string) {
+  const opts = {
+    suggestedName: fileName,
+    types: [
+      {
+        description: 'Word document',
+        accept: {
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+            ['.docx'],
+        },
+      },
+    ],
+  }
+
+  return await (window as any).showSaveFilePicker(opts)
+}
+
+async function wordBlobToFile(blob: Blob, fileName: string, fileHandle: any) {
+  if (!fileHandle) {
+    // fallback as FilePicker is experimental
+    saveAs(blob, fileName)
+    return
+  }
+
+  const writable = await fileHandle.createWritable()
+  await writable.write(blob)
+  await writable.close()
+}
+
 export async function downloadTranscriptDoc(
   transcript: DialogueEntry[],
   fileName: string = 'transcript.docx'
 ): Promise<void> {
+  const fileHandle = await getNewFileHandle(fileName)
+
   const html = `<!DOCTYPE html><html><head>${getDocumentStyles()}</head><body>${formatTranscript(transcript)}</body></html>`
   const result = await asBlob(html)
   const blob = result instanceof Blob ? result : new Blob([result as BlobPart])
 
-  saveAs(blob, fileName)
+  await wordBlobToFile(blob, fileName, fileHandle)
 }
 
 async function convertHTMLToWordAndDownload(
@@ -118,11 +149,13 @@ async function convertHTMLToWordAndDownload(
   transcript: DialogueEntry[],
   fileName: string = 'ai-minutes.docx'
 ): Promise<void> {
+  const fileHandle = await getNewFileHandle(fileName)
+
   const processedHtml = preprocessHtml(htmlContent, transcript)
   const result = await asBlob(processedHtml)
   const blob = result instanceof Blob ? result : new Blob([result as BlobPart])
 
-  saveAs(blob, fileName)
+  await wordBlobToFile(blob, fileName, fileHandle)
 }
 
 async function convertAIMinutesToWordDoc(
