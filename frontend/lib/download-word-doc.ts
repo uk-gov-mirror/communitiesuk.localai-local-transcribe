@@ -102,8 +102,10 @@ export function preprocessHtml(
 </html>`
 }
 
-async function getNewFileHandle(fileName: string) {
-  const opts = {
+async function getNewFileHandle(
+  fileName: string
+): Promise<FileSystemFileHandle | null> {
+  const options = {
     suggestedName: fileName,
     types: [
       {
@@ -116,12 +118,46 @@ async function getNewFileHandle(fileName: string) {
     ],
   }
 
-  return await (window as any).showSaveFilePicker(opts)
+  if (!window.showSaveFilePicker) {
+    return null
+  }
+
+  return await window.showSaveFilePicker(options)
 }
 
-async function wordBlobToFile(blob: Blob, fileName: string, fileHandle: any) {
+async function getNewFileHandleOrAbort(
+  fileName: string
+): Promise<FileSystemFileHandle | null | undefined> {
+  // cancelling FileSave causes an AbortError so catch that here
+  try {
+    return await getNewFileHandle(fileName)
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return undefined
+    }
+
+    throw error
+  }
+}
+
+async function wordBlobToFile(
+  blob: Blob,
+  fileName: string,
+  fileHandle: FileSystemFileHandle | null | undefined
+) {
+  // if (!fileHandle === undefined) {
+  //   // user cancelled download
+  //   return
+  // }
+
+  // if (!fileHandle === null) {
+  //   // fallback as FilePicker is experimental so may be null
+  //   saveAs(blob, fileName)
+  //   return
+  // }
+
   if (!fileHandle) {
-    // fallback as FilePicker is experimental
+    // fallback as FilePicker is experimental so may be null
     saveAs(blob, fileName)
     return
   }
