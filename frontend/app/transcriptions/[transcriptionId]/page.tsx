@@ -48,8 +48,6 @@ export default function TranscriptionPage(props: {
 
   const { transcriptionId } = params
 
-  const { setBanner, clearBanner } = useBannerStore()
-
   const isChatEnabled = useFeatureFlagEnabled(FeatureFlags.ChatEnabled)
   const [lineEditError, setLineEditError] = useState<string | null>(null)
   const errorSummaryRef = useRef<HTMLDivElement | null>(null)
