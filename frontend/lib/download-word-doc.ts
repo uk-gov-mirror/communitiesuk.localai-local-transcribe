@@ -145,18 +145,12 @@ async function wordBlobToFile(
   fileName: string,
   fileHandle: FileSystemFileHandle | null | undefined
 ) {
-  // if (!fileHandle === undefined) {
-  //   // user cancelled download
-  //   return
-  // }
+  if (fileHandle === undefined) {
+    // user cancelled download
+    return
+  }
 
-  // if (!fileHandle === null) {
-  //   // fallback as FilePicker is experimental so may be null
-  //   saveAs(blob, fileName)
-  //   return
-  // }
-
-  if (!fileHandle) {
+  if (fileHandle === null) {
     // fallback as FilePicker is experimental so may be null
     saveAs(blob, fileName)
     return
@@ -171,7 +165,7 @@ export async function downloadTranscriptDoc(
   transcript: DialogueEntry[],
   fileName: string = 'transcript.docx'
 ): Promise<void> {
-  const fileHandle = await getNewFileHandle(fileName)
+  const fileHandle = await getNewFileHandleOrAbort(fileName)
 
   const html = `<!DOCTYPE html><html><head>${getDocumentStyles()}</head><body>${formatTranscript(transcript)}</body></html>`
   const result = await asBlob(html)
@@ -185,7 +179,7 @@ async function convertHTMLToWordAndDownload(
   transcript: DialogueEntry[],
   fileName: string = 'ai-minutes.docx'
 ): Promise<void> {
-  const fileHandle = await getNewFileHandle(fileName)
+  const fileHandle = await getNewFileHandleOrAbort(fileName)
 
   const processedHtml = preprocessHtml(htmlContent, transcript)
   const result = await asBlob(processedHtml)
