@@ -23,8 +23,8 @@ export function ReviewGuardButton({
   const [modalOpen, setModalOpen] = useState(false)
 
   const handleConfirm = async () => {
-    await onConfirm()
     setModalOpen(false)
+    await onConfirm()
   }
 
   return (

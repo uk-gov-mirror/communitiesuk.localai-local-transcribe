@@ -358,7 +358,10 @@ export function TranscriptionTab({
     const fileName = `transcript${timeStamp}.docx`
 
     try {
-      await downloadTranscriptDoc(entries, fileName)
+      const downloaded = await downloadTranscriptDoc(entries, fileName)
+      if (!downloaded) {
+        return
+      }
       setBanner({
         variant: 'success',
         title: 'Success',

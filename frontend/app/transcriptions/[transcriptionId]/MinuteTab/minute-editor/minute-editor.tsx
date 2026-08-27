@@ -151,15 +151,20 @@ export function MinuteEditor({
     }
   }
 
-  const handleWordDocDownload = () => {
+  const handleWordDocDownload = async () => {
+    const fileName = transcription.date_of_recording
+      ? `${minute.template_name} ${formatDate(transcription.date_of_recording)}`
+      : 'minutes.docx'
+
     try {
-      convertAIMinutesToWordDoc(
+      const downloaded = await convertAIMinutesToWordDoc(
         htmlContent,
         transcription.dialogue_entries || [],
-        transcription.date_of_recording
-          ? `${minute.template_name} ${formatDate(transcription.date_of_recording)}`
-          : 'minutes.docx'
+        fileName
       )
+      if (!downloaded) {
+        return
+      }
       setBanner({
         variant: 'success',
         title: 'Success',

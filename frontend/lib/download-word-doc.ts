@@ -147,54 +147,55 @@ async function wordBlobToFile(
 ) {
   if (fileHandle === undefined) {
     // user cancelled download
-    return
+    return false
   }
 
   if (fileHandle === null) {
     // fallback as FilePicker is experimental so may be null
     saveAs(blob, fileName)
-    return
+    return true
   }
 
   const writable = await fileHandle.createWritable()
   await writable.write(blob)
   await writable.close()
+  return true
 }
 
 export async function downloadTranscriptDoc(
   transcript: DialogueEntry[],
   fileName: string = 'transcript.docx'
-): Promise<void> {
+): Promise<boolean> {
   const fileHandle = await getNewFileHandleOrAbort(fileName)
 
   const html = `<!DOCTYPE html><html><head>${getDocumentStyles()}</head><body>${formatTranscript(transcript)}</body></html>`
   const result = await asBlob(html)
   const blob = result instanceof Blob ? result : new Blob([result as BlobPart])
 
-  await wordBlobToFile(blob, fileName, fileHandle)
+  return await wordBlobToFile(blob, fileName, fileHandle)
 }
 
 async function convertHTMLToWordAndDownload(
   htmlContent: string,
   transcript: DialogueEntry[],
   fileName: string = 'ai-minutes.docx'
-): Promise<void> {
+): Promise<boolean> {
   const fileHandle = await getNewFileHandleOrAbort(fileName)
 
   const processedHtml = preprocessHtml(htmlContent, transcript)
   const result = await asBlob(processedHtml)
   const blob = result instanceof Blob ? result : new Blob([result as BlobPart])
 
-  await wordBlobToFile(blob, fileName, fileHandle)
+  return await wordBlobToFile(blob, fileName, fileHandle)
 }
 
 async function convertAIMinutesToWordDoc(
   html: string,
   transcript: DialogueEntry[],
   fileName: string = 'document.docx'
-): Promise<void> {
+): Promise<boolean> {
   const cleanedHTML = html.replace(citationRegexWithSpace, '')
-  await convertHTMLToWordAndDownload(cleanedHTML, transcript, fileName)
+  return await convertHTMLToWordAndDownload(cleanedHTML, transcript, fileName)
 }
 
 export default convertAIMinutesToWordDoc
