@@ -37,7 +37,7 @@ export function ReviewGuardButton({
       setBanner({
         variant: 'important',
         title: 'Error',
-        message: `Error ${action === 'copy' ? 'copying' : 'downloading'} transcript.`,
+        message: `Error ${action === 'copy' ? 'copying' : 'downloading'} ${subject}.`,
       })
     }
   }

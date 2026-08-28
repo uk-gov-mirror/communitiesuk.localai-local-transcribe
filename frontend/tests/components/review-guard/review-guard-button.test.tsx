@@ -49,15 +49,16 @@ describe('<ReviewGuardButton />', () => {
     expect(screen.queryByText('Confirm review')).not.toBeInTheDocument()
   })
 
-  it('calls onConfirm after review confirmation and closes the modal', async () => {
-    const onConfirm = vi.fn()
+  it('calls onConfirm and onSuccess after review confirmation and closes the modal', async () => {
+    const onConfirm = vi.fn().mockRejectedValue(true)
+    const onSuccess = vi.fn()
 
     render(
       <ReviewGuardButton
         action="copy"
         subject="transcript"
         onConfirm={onConfirm}
-        onSuccess={vi.fn()}
+        onSuccess={onSuccess}
       />
     )
 
@@ -67,6 +68,10 @@ describe('<ReviewGuardButton />', () => {
 
     await waitFor(() => {
       expect(onConfirm).toHaveBeenCalledTimes(1)
+    })
+
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalledTimes(1)
     })
 
     await waitFor(() => {

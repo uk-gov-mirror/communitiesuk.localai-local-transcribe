@@ -61,6 +61,8 @@ export function TranscriptionTab({
     defaultValues: { entries: transcription.dialogue_entries || [] },
     mode: 'onBlur',
   })
+  const { setBanner, clearBanner } = useBannerStore()
+
   const { control, reset, resetField, setValue, getValues } = methods
   const watchedEntries = useWatch({ control, name: 'entries' })
 
@@ -153,6 +155,7 @@ export function TranscriptionTab({
 
   const handleRenameSpeakerEverywhere = useCallback(
     async (originalSpeaker: string, newSpeaker: string) => {
+      clearBanner()
       if (originalSpeaker === newSpeaker) {
         return
       }
@@ -219,8 +222,6 @@ export function TranscriptionTab({
   const [lineEditInProgress, setLineEditInProgress] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
-  const { setBanner, clearBanner } = useBannerStore()
-
   const setError = useCallback(
     (error: string | null) => {
       onLineEditError(error)
@@ -243,6 +244,7 @@ export function TranscriptionTab({
     new Promise((resolve) => setTimeout(resolve, 100)).then(scrollToPlaying)
 
   const enterLineEditMode = () => {
+    clearBanner()
     if (!fields.length) {
       setError('No lines available to edit.')
       return
@@ -364,10 +366,7 @@ export function TranscriptionTab({
     <div>
       <FormProvider {...methods}>
         <form>
-          <GovukButtonGroup
-            className="govuk-!-margin-bottom-4"
-            onClick={clearBanner}
-          >
+          <GovukButtonGroup className="govuk-!-margin-bottom-4">
             <SpeakerEditor
               src={hasRecordings ? recordings[0].url : undefined}
               onSaveSpeaker={handleRenameSpeakerEverywhere}
