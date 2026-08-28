@@ -357,43 +357,7 @@ export function TranscriptionTab({
     const timeStamp = formatted ? `-${formatted}` : ''
     const fileName = `transcript${timeStamp}.docx`
 
-    try {
-      const downloaded = await downloadTranscriptDoc(entries, fileName)
-      if (!downloaded) {
-        return
-      }
-      setBanner({
-        variant: 'success',
-        title: 'Success',
-        message: 'Transcript downloaded',
-      })
-    } catch {
-      setBanner({
-        variant: 'important',
-        title: 'Error',
-        message: 'Error downloading transcript.',
-      })
-    }
-  }
-
-  const handleCopyTranscript = async () => {
-    try {
-      await copyHTML(transcriptionString)
-      setBanner({
-        variant: 'success',
-        title: 'Success',
-        message: `'${transcription.title}' copied to clipboard`,
-      })
-      posthog.capture('editor_content_copied', {
-        contentLength: transcriptionString.length,
-      })
-    } catch {
-      setBanner({
-        variant: 'important',
-        title: 'Error',
-        message: 'Error copying document.',
-      })
-    }
+    return await downloadTranscriptDoc(entries, fileName)
   }
 
   return (
@@ -421,7 +385,17 @@ export function TranscriptionTab({
               Edit transcript
             </GovukButton>
             <ReviewGuardButton
-              onConfirm={handleCopyTranscript}
+              onConfirm={async () => await copyHTML(transcriptionString)}
+              onSuccess={() => {
+                setBanner({
+                  variant: 'success',
+                  title: 'Success',
+                  message: `'${transcription.title}' copied to clipboard`,
+                })
+                posthog.capture('editor_content_copied', {
+                  contentLength: transcriptionString.length,
+                })
+              }}
               disabled={isLineEditMode}
               action="copy"
               subject="transcript"
@@ -429,7 +403,16 @@ export function TranscriptionTab({
 
             {fields.length > 0 && (
               <ReviewGuardButton
-                onConfirm={() => handleDownloadTranscript(getValues('entries'))}
+                onConfirm={async () =>
+                  await handleDownloadTranscript(getValues('entries'))
+                }
+                onSuccess={() => {
+                  setBanner({
+                    variant: 'success',
+                    title: 'Success',
+                    message: 'Transcript downloaded',
+                  })
+                }}
                 disabled={isLineEditMode}
                 action="download"
                 subject="transcript"

@@ -90,4 +90,5 @@ export async function copyHTML(textToCopy: string) {
     // Fallback for browsers that don't support clipboard.write
     await navigator.clipboard.writeText(stripHtmlTags(textToCopy))
   }
+  return true
 }

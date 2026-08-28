@@ -153,34 +153,14 @@ export function MinuteEditor({
 
   const handleWordDocDownload = async () => {
     const fileName = transcription.date_of_recording
-      ? `${minute.template_name} ${formatDate(transcription.date_of_recording)}`
+      ? `${minute.template_name} ${formatDate(transcription.date_of_recording)}.docx`
       : 'minutes.docx'
 
-    try {
-      const downloaded = await convertAIMinutesToWordDoc(
-        htmlContent,
-        transcription.dialogue_entries || [],
-        fileName
-      )
-      if (!downloaded) {
-        return
-      }
-      setBanner({
-        variant: 'success',
-        title: 'Success',
-        message: `'${minute.template_name}' downloaded`,
-      })
-      posthog.capture('minutes_downloaded', {
-        format: 'word',
-        version_id: minuteVersion?.id,
-      })
-    } catch {
-      setBanner({
-        variant: 'important',
-        title: 'Error',
-        message: 'Error downloading document.',
-      })
-    }
+    return await convertAIMinutesToWordDoc(
+      htmlContent,
+      transcription.dialogue_entries || [],
+      fileName
+    )
   }
 
   if (isLoading) {
@@ -282,12 +262,33 @@ export function MinuteEditor({
           </GovukButton>
         )}
         <ReviewGuardButton
-          onConfirm={handleCopyDocument}
+          onConfirm={async () => await copyHTML(contentToCopy)}
+          onSuccess={() => {
+            setBanner({
+              variant: 'success',
+              title: 'Success',
+              message: `'${minute.template_name}' copied to clipboard`,
+            })
+            posthog.capture('editor_content_copied', {
+              contentLength: contentToCopy.length,
+            })
+          }}
           action="copy"
           subject="document"
         />
         <ReviewGuardButton
           onConfirm={handleWordDocDownload}
+          onSuccess={() => {
+            setBanner({
+              variant: 'success',
+              title: 'Success',
+              message: `'${minute.template_name}' downloaded`,
+            })
+            posthog.capture('minutes_downloaded', {
+              format: 'word',
+              version_id: minuteVersion?.id,
+            })
+          }}
           action="download"
           subject="document"
         />

@@ -1,11 +1,13 @@
 'use client'
 
+import { useState } from 'react'
+import { useBannerStore } from '@/stores/use-banner-store'
 import { GovukButton } from '@/components/govuk'
 import { ReviewGuardModal } from '@/components/review-guard/review-guard-modal'
-import { useState } from 'react'
 
 interface ReviewGuardButtonProps {
-  onConfirm: () => void | Promise<void>
+  onConfirm: () => boolean | Promise<boolean>
+  onSuccess: () => void | Promise<void>
   disabled?: boolean
   className?: string
   // following props used only for wording/modal id
@@ -15,16 +17,29 @@ interface ReviewGuardButtonProps {
 
 export function ReviewGuardButton({
   onConfirm,
+  onSuccess,
   disabled,
   className,
   action,
   subject,
 }: ReviewGuardButtonProps) {
   const [modalOpen, setModalOpen] = useState(false)
+  const { setBanner } = useBannerStore()
 
   const handleConfirm = async () => {
     setModalOpen(false)
-    await onConfirm()
+    try {
+      const success = await onConfirm()
+      if (success) {
+        await onSuccess()
+      }
+    } catch {
+      setBanner({
+        variant: 'important',
+        title: 'Error',
+        message: `Error ${action === 'copy' ? 'copying' : 'downloading'} transcript.`,
+      })
+    }
   }
 
   return (
@@ -36,7 +51,7 @@ export function ReviewGuardButton({
         disabled={disabled}
         className={className}
       >
-        {action[0].toUpperCase() + action.slice(1)} {subject}
+        {action === 'copy' ? 'Copy' : 'Download'} {subject}
       </GovukButton>
 
       <ReviewGuardModal
