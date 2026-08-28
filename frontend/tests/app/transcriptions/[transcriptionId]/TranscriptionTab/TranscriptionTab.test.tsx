@@ -53,22 +53,6 @@ vi.mock('@/components/ui/copy-button', () => ({
   ),
 }))
 
-vi.mock('@/components/recordings/copy-transcript-button', () => ({
-  CopyTranscriptButton: ({ disabled }: { disabled?: boolean }) => (
-    <button type="button" disabled={disabled}>
-      Copy transcript
-    </button>
-  ),
-}))
-
-vi.mock('@/components/recordings/download-transcript-button', () => ({
-  DownloadTranscriptButton: ({ disabled }: { disabled?: boolean }) => (
-    <button type="button" disabled={disabled}>
-      Download transcript
-    </button>
-  ),
-}))
-
 vi.mock('@/stores/use-banner-store', () => ({
   useBannerStore: () => ({
     setBanner: setBannerMock,

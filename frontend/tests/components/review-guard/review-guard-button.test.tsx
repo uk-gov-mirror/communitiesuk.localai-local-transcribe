@@ -9,6 +9,7 @@ describe('<ReviewGuardButton />', () => {
         action="copy"
         subject="transcript"
         onConfirm={vi.fn()}
+        onSuccess={vi.fn()}
       />
     )
 
@@ -23,6 +24,7 @@ describe('<ReviewGuardButton />', () => {
         action="download"
         subject="document"
         onConfirm={vi.fn()}
+        onSuccess={vi.fn()}
       />
     )
 
@@ -38,6 +40,7 @@ describe('<ReviewGuardButton />', () => {
         subject="document"
         disabled
         onConfirm={vi.fn()}
+        onSuccess={vi.fn()}
       />
     )
 
@@ -54,6 +57,7 @@ describe('<ReviewGuardButton />', () => {
         action="copy"
         subject="transcript"
         onConfirm={onConfirm}
+        onSuccess={vi.fn()}
       />
     )
 
@@ -76,6 +80,7 @@ describe('<ReviewGuardButton />', () => {
         action="download"
         subject="document"
         onConfirm={vi.fn()}
+        onSuccess={vi.fn()}
       />
     )
 
