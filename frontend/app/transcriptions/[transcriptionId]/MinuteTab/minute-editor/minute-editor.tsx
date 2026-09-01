@@ -131,26 +131,6 @@ export function MinuteEditor({
     [minute.id, minuteVersion?.html_content, onSuccess, saveEdit]
   )
 
-  const handleCopyDocument = async () => {
-    try {
-      await copyHTML(contentToCopy)
-      setBanner({
-        variant: 'success',
-        title: 'Success',
-        message: `'${minute.template_name}' copied to clipboard`,
-      })
-      posthog.capture('editor_content_copied', {
-        contentLength: contentToCopy.length,
-      })
-    } catch {
-      setBanner({
-        variant: 'important',
-        title: 'Error',
-        message: 'Error copying document.',
-      })
-    }
-  }
-
   const handleWordDocDownload = async () => {
     const fileName = transcription.date_of_recording
       ? `${minute.template_name} ${formatDate(transcription.date_of_recording)}.docx`
