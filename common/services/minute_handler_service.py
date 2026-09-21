@@ -29,6 +29,7 @@ from common.services.template_manager import TemplateManager
 from common.settings import get_settings
 from common.templates.user_template import generate_user_template
 from common.types import (
+    GuardrailAction,
     GuardrailScore,
     MeetingType,
     MinuteAndHallucinations,
@@ -64,6 +65,7 @@ class MinuteHandlerService:
                         explanation=detail.explanation,
                     )
                     for detail in score.categories
+                    if not passed
                 ],
             )
             session.add(guardrail_result)
@@ -157,6 +159,8 @@ class MinuteHandlerService:
         content: str,
         transcript: list[DialogueEntry],
         label: str,
+        action: GuardrailAction,
+        edit_instructions: str | None = None,
     ) -> None:
         """Helper to run accuracy check and handle result/error logging."""
         word_count = cls._calculate_word_count(transcript)
@@ -170,6 +174,8 @@ class MinuteHandlerService:
             accuracy_score = await cls.calculate_accuracy_score(
                 minute=content,
                 transcript=transcript,
+                action=action,
+                edit_instructions=edit_instructions,
             )
             cls.save_guardrail_result(minute_version_id, accuracy_score)
             logger.info("%s: Saved guardrail result for %s: %s", minute_id, label, accuracy_score)
@@ -201,6 +207,7 @@ class MinuteHandlerService:
                 content=html_content,
                 transcript=dialogue_entries,
                 label="generation",
+                action=GuardrailAction.ORIGINAL_GENERATION,
             )
 
             cls.update_minute_version(
@@ -253,6 +260,8 @@ class MinuteHandlerService:
                 content=generated.text,
                 transcript=transcript,
                 label="edit",
+                action=GuardrailAction.AI_EDIT,
+                edit_instructions=target_minute_version.ai_edit_instructions,
             )
 
             cls.update_minute_version(
@@ -374,9 +383,17 @@ class MinuteHandlerService:
         cls,
         minute: str,
         transcript: list[DialogueEntry],
+        action: GuardrailAction = GuardrailAction.ORIGINAL_GENERATION,
+        edit_instructions: str | None = None,
     ) -> GuardrailScore:
         chatbot = create_default_chatbot(FastOrBestLLM.FAST)
         return await chatbot.structured_chat(
-            messages=get_accuracy_check_messages(minute, transcript, settings.GUARDRAIL_THRESHOLD),
+            messages=get_accuracy_check_messages(
+                minute,
+                transcript,
+                settings.GUARDRAIL_THRESHOLD,
+                action=action,
+                edit_instructions=edit_instructions,
+            ),
             response_format=GuardrailScore,
         )

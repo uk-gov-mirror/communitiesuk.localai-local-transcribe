@@ -5,6 +5,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoes
 from common.canaries import wrap_with_canary
 from common.database.postgres_models import DialogueEntry
 from common.format_transcript import transcript_as_index_speaker_and_utterance, transcript_as_speaker_and_utterance
+from common.types import GuardrailAction
 
 _TEMPLATES_DIR = Path(__file__).parent / "prompt_templates"
 _env = Environment(
@@ -147,11 +148,19 @@ def get_meeting_detection_prompt(transcript: list[DialogueEntry]) -> list[dict[s
 
 
 def get_accuracy_check_messages(
-    minute: str, transcript: list[DialogueEntry], guardrail_threshold: float
+    minute: str,
+    transcript: list[DialogueEntry],
+    guardrail_threshold: float,
+    action: GuardrailAction = GuardrailAction.ORIGINAL_GENERATION,
+    edit_instructions: str | None = None,
 ) -> list[dict[str, str]]:
-    return [
+    messages = [
         build_prompt_injection_aware_system_message(
-            render_prompt_template("accuracy_check_system.j2", guardrail_threshold=guardrail_threshold)
+            render_prompt_template(
+                "accuracy_check_system.j2",
+                guardrail_threshold=guardrail_threshold,
+                include_ai_edit_categories=action == GuardrailAction.AI_EDIT,
+            )
         ),
         get_transcript_messages(transcript),
         {
@@ -159,6 +168,16 @@ def get_accuracy_check_messages(
             "content": render_prompt_template("generated_summary_to_evaluate.j2", minute=wrap_meeting_summary(minute)),
         },
     ]
+    if action == GuardrailAction.AI_EDIT and edit_instructions:
+        messages.append(
+            {
+                "role": "user",
+                "content": render_prompt_template(
+                    "edit_instructions.j2", edit_instructions=wrap_user_instructions(edit_instructions)
+                ),
+            }
+        )
+    return messages
 
 
 def format_guidelines(guidelines: str | list[str]) -> str:
