@@ -6,6 +6,10 @@ Approved
 
 Date of decision: 2026-08-11
 
+Implementation note: the inherited PostHog integration was removed in favour of Plausible for aggregate analytics. Feature
+flags are not implemented through Plausible because it does not provide feature management and the service must not send
+user identity to analytics.
+
 ## Context and Problem Statement
 
 We want to gain insights into how people use Local Transcribe, so we can understand how to make (particularly incremental)
@@ -29,8 +33,8 @@ Plausible + first-party database, because it leverages off-the-shelf software wh
 
 ### PostHog
 
-The inherited Minute codebase used PostHog, so this is still present (dormant) in the Local Transcribe codebase. PostHog provides
-basic web analytics, custom events, and user-level insights.
+At the time of this decision, the inherited Minute codebase's PostHog integration was still present but dormant in the Local
+Transcribe codebase. PostHog provides basic web analytics, custom events, and user-level insights.
 
 * Bad, because it is not Cyber assured
 * Bad, because it requires a 'cookie banner' to gather consent from the user for it to be used

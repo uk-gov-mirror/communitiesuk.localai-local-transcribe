@@ -5,8 +5,8 @@ import {
 } from '@/components/govuk'
 import { useUpdateTranscription } from '@/hooks/use-update-transcription-speakers'
 import { JobStatus } from '@/lib/client'
+import { recordAnalyticsEvent } from '@/lib/analytics'
 import { cn } from '@/lib/utils'
-import posthog from 'posthog-js'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 
@@ -39,14 +39,10 @@ export const TranscriptionTitleEditor = ({
         )
         return
       }
-      try {
-        posthog.capture('edited_transcript_title', {
-          transcriptionId: transcriptionId,
-        })
-      } catch {}
+      recordAnalyticsEvent('edited_transcript_title')
       setEditing(false)
     },
-    [transcriptionId, updateTitle]
+    [updateTitle]
   )
   const handleCancel = useCallback(() => {
     form.reset({ title: title || '' })

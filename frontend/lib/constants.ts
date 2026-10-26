@@ -16,3 +16,4 @@ export const MAX_AGENDA_LENGTH = 500
  * See AIILG-1050.
  */
 export const OFFLINE_RECORDINGS_ENABLED = false
+export const CHAT_ENABLED = process.env.NEXT_PUBLIC_CHAT_ENABLED === 'true'

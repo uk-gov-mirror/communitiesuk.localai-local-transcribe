@@ -6,12 +6,12 @@ import {
   duplicateUserTemplateUserTemplatesTemplateIdDuplicatePostMutation,
   getUserTemplatesUserTemplatesGetQueryKey,
 } from '@/lib/client/@tanstack/react-query.gen'
+import { recordAnalyticsEvent } from '@/lib/analytics'
 import { useBannerStore } from '@/stores/use-banner-store'
 import { useTemplateDraftStore } from '@/stores/use-template-draft-store'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import posthog from 'posthog-js'
 import { use } from 'react'
 
 export default function DuplicateTemplatePage(props: {
@@ -36,7 +36,9 @@ export default function DuplicateTemplatePage(props: {
         title: 'Success',
         message: `‘${duplicatedTemplate.name}’ created`,
       })
-      posthog.capture('template_duplicated')
+      recordAnalyticsEvent('template_duplicated', {
+        template_source: 'user',
+      })
       clearDraft()
       router.push('/templates')
     },

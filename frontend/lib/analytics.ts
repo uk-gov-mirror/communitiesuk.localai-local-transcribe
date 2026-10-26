@@ -8,6 +8,19 @@ export type AnalyticsEventName =
   | 'transcript_requested_for_live_recording'
   | 'transcript_requested_for_direct_upload'
   | 'summary_requested'
+  | 'edited_transcript_title'
+  | 'generate_ai_minutes_started'
+  | 'editor_content_copied'
+  | 'transcript_text_edited'
+  | 'speaker_name_edited_in_transcript'
+  | 'citation_clicked'
+  | 'minutes_downloaded'
+  | 'offline_recording_deleted'
+  | 'recording_downloaded'
+  | 'template_example_selected'
+  | 'template_deleted'
+  | 'template_created'
+  | 'template_duplicated'
 
 const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN
 

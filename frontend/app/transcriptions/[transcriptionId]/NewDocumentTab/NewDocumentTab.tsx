@@ -23,7 +23,6 @@ import {
 import { useBannerStore } from '@/stores/use-banner-store'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { LoaderCircle } from 'lucide-react'
-import posthog from 'posthog-js'
 import { useEffect, useRef, useState } from 'react'
 import { MinuteEditor } from '@/app/transcriptions/[transcriptionId]/MinuteTab/minute-editor/minute-editor'
 
@@ -212,10 +211,10 @@ export const NewDocumentTab = ({
                 { path: { transcription_id: transcription.id! } }
               ),
           })
-          posthog.capture('generate_ai_minutes_started', {
+          recordAnalyticsEvent('generate_ai_minutes_started', {
             style: isDefaultTemplateId(selectedTemplate.id)
-              ? selectedTemplate.name
-              : 'User generated',
+              ? 'default'
+              : 'user',
           })
           setCreatedTemplateName(selectedTemplate.name)
           setCreatedMinuteId(data.minute_id)

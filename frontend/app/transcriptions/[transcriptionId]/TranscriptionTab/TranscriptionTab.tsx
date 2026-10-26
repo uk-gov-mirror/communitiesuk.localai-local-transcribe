@@ -9,6 +9,7 @@ import {
   useUpdateTranscriptionSpeakers,
 } from '@/hooks/use-update-transcription-speakers'
 import { DialogueEntry, TranscriptionGetResponse } from '@/lib/client'
+import { recordAnalyticsEvent } from '@/lib/analytics'
 import { getRecordingsForTranscriptionTranscriptionsTranscriptionIdRecordingsGetOptions } from '@/lib/client/@tanstack/react-query.gen'
 import { cn, formatDate, copyHTML } from '@/lib/utils'
 import { useBannerStore } from '@/stores/use-banner-store'
@@ -25,7 +26,6 @@ import {
   useState,
 } from 'react'
 import { FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form'
-import posthog from 'posthog-js'
 
 export type DialogueEntryForm = {
   entries: DialogueEntry[]
@@ -458,8 +458,8 @@ export function TranscriptionTab({
                   title: 'Success',
                   message: `'${transcription.title}' copied to clipboard`,
                 })
-                posthog.capture('editor_content_copied', {
-                  contentLength: transcriptionString.length,
+                recordAnalyticsEvent('editor_content_copied', {
+                  content_type: 'transcript',
                 })
               }}
               disabled={isLineEditMode}

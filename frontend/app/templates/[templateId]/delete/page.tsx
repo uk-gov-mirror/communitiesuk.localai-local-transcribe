@@ -7,12 +7,12 @@ import {
   deleteUserTemplateUserTemplatesTemplateIdDeleteMutation,
   getUserTemplatesUserTemplatesGetQueryKey,
 } from '@/lib/client/@tanstack/react-query.gen'
+import { recordAnalyticsEvent } from '@/lib/analytics'
 import { useBannerStore } from '@/stores/use-banner-store'
 import { useTemplateDraftStore } from '@/stores/use-template-draft-store'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import posthog from 'posthog-js'
 import { use } from 'react'
 
 export default function DeleteTemplatePage(props: {
@@ -37,7 +37,7 @@ export default function DeleteTemplatePage(props: {
         title: 'Template deleted',
         message: `‘${name}’ deleted`,
       })
-      posthog.capture('template_deleted')
+      recordAnalyticsEvent('template_deleted')
       clearDraft()
       router.push('/templates')
     },

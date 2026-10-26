@@ -70,7 +70,8 @@ Note:
 
 - Update `FAST_LLM_PROVIDER`, `FAST_LLM_MODEL_NAME`, `BEST_LLM_PROVIDER`, and `BEST_LLM_MODEL_NAME` correspondingly.
 
-This should be sufficient for local development. Keys related to 'AWS', 'Google cloud', and 'other' (Sentry/Posthog) are not required. After updating `.env`, restart the Docker container to apply changes
+This should be sufficient for local development. Keys related to AWS, Google Cloud, Sentry, and Plausible are not required.
+After updating `.env`, restart the Docker container to apply changes.
 
 #### Set up your development environment:
 
@@ -445,12 +446,10 @@ To set up sentry for telemetry, create an account at [sentry.io](sentry.io).
 - Navigate to the SSM parameter store entry for your deployed application
 - Replace `SENTRY_DSN` value with the value you copied
 
-#### Posthog setup (optional)
+#### Plausible setup (optional)
 
-To set up posthog for UX tracking, feature flags etc, create an account at [eu.posthog.com](https://eu.posthog.com/).
-
-- create a project and obtain an API key (it should start `phc_`)
-- set the key `POSTHOG_API_KEY` value in your `.env`
+Set `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` in `.env` to the domain configured for the site in Plausible. When it is unset, analytics
+are disabled.
 
 ## Testing
 

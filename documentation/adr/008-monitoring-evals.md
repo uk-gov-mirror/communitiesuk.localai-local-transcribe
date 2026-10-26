@@ -57,7 +57,7 @@ Evaluate inputs flagged as problematic via explicit feedback (e.g., thumbs down)
 * Good, because it focuses resources on actual user pain points and surfaces unknown issues.
 * Bad, because it requires high implementation effort and misses issues users don't flag.
 * Bad, because it creates blind spots that can mask overall performance degradation.
-* Neutral, because user interactions are partially captured in PostHog already.
+* Neutral, because aggregate user interactions are partially captured in Plausible already.
 
 ### Third-party moderation/safety APIs
 
@@ -82,7 +82,7 @@ Periodically sample production inputs/outputs and run LLM-as-a-judge evaluations
 
 ### No additional monitoring
 
-Rely solely on existing user logging and feedback (e.g., PostHog analytics).
+Rely solely on existing user logging and feedback (e.g., Plausible analytics).
 
 * Good, because it requires no additional cost or engineering effort.
 * Bad, because it cannot detect gradual degradation, distinguish feature vs. provider regressions, or provide visibility between user-reported incidents.

@@ -12,8 +12,8 @@ import { useCallback, useEffect } from 'react'
 
 import { citationRegexWithSpace } from '@/lib/citationRegex'
 import { TranscriptionGetResponse } from '@/lib/client'
+import { recordAnalyticsEvent } from '@/lib/analytics'
 import { cn } from '@/lib/utils'
-import posthog from 'posthog-js'
 import {
   Bold as BoldIcon,
   Code as CodeIcon,
@@ -139,7 +139,7 @@ function SimpleEditor({
         const indexAttr = citationLink.getAttribute('data-citation-index')
         if (indexAttr === null) return false
         const index = parseInt(indexAttr, 10)
-        posthog.capture('citation_clicked', { citationIndex: index })
+        recordAnalyticsEvent('citation_clicked')
         onCitationClicked?.(index)
         return true
       }

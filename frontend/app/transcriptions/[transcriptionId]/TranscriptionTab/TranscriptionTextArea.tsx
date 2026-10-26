@@ -1,5 +1,5 @@
 import { DialogueEntryForm } from '@/app/transcriptions/[transcriptionId]/TranscriptionTab/TranscriptionTab'
-import posthog from 'posthog-js'
+import { recordAnalyticsEvent } from '@/lib/analytics'
 import { Control, Controller } from 'react-hook-form'
 
 export const TranscriptionTextArea = ({
@@ -54,9 +54,7 @@ export const TranscriptionTextArea = ({
                   // Rollback is handled in the parent callback; prevent unhandled rejections from blur events.
                   void onSaveText(index, newText, field.value).catch(() => {})
 
-                  posthog.capture('transcript_text_edited', {
-                    entry_index: index,
-                  })
+                  recordAnalyticsEvent('transcript_text_edited')
                 }
               }}
               onKeyDown={(e) => {

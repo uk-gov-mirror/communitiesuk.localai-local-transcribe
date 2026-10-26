@@ -6,8 +6,8 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { SingleRecording } from '@/lib/client'
+import { recordAnalyticsEvent } from '@/lib/analytics'
 import { Download } from 'lucide-react'
-import posthog from 'posthog-js'
 
 export const DownloadButton = ({
   recordings,
@@ -15,9 +15,8 @@ export const DownloadButton = ({
   recordings: SingleRecording[]
 }) => {
   const onClick = (recording: SingleRecording) => () => {
-    posthog.capture('recording_downloaded', {
+    recordAnalyticsEvent('recording_downloaded', {
       extension: recording.extension,
-      recording_id: recording.id,
     })
   }
   if (recordings.length == 1) {
