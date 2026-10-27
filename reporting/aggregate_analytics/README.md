@@ -89,7 +89,7 @@ Wrapper flags come first. Everything after a lone `--` is passed unchanged to th
 
 | Flag | Required | Example | Description |
 |------|----------|---------|-------------|
-| `--environment` | No (default `development`) | `--environment production` | Environment whose bastion and RDS instance (`<env>-bastion-1`, `<env>-database`) to tunnel to. Also sets `ENVIRONMENT` for the run. |
+| `--environment` | No (default `production`) | `--environment development` | Environment whose bastion and RDS instance (`<env>-bastion-1`, `<env>-database`) to tunnel to. Also sets `ENVIRONMENT` for the run. |
 | `--local-port` | No (default `5433`) | `--local-port 5434` | Local port the tunnel listens on. Becomes `POSTGRES_PORT` for the run. |
 | `--` | Yes, to pass report flags | `-- --start 2026-09-01 --end 2026-09-30` | Separator; the report's `--start` and `--end` are required, so in practice always include it. |
 | `-h`, `--help` | No | `--help` | Show usage. |

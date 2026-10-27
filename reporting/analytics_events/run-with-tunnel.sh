@@ -15,7 +15,6 @@ usage() {
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ENVIRONMENT="production"
 LOCAL_PORT="5433"
-REGION="eu-west-2"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -26,33 +25,9 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-"$ROOT/connect-to-aws-db.sh" --environment "$ENVIRONMENT" --local-port "$LOCAL_PORT" --tunnel-only >&2 &
-TUNNEL_PID=$!
-cleanup() {
-  kill "$TUNNEL_PID" 2>/dev/null || true
-  wait "$TUNNEL_PID" 2>/dev/null || true
-}
-trap cleanup EXIT
-
-for _ in $(seq 1 60); do
-  kill -0 "$TUNNEL_PID" 2>/dev/null || { echo "Error: tunnel exited before opening." >&2; exit 1; }
-  (exec 3<>"/dev/tcp/127.0.0.1/${LOCAL_PORT}") 2>/dev/null && break
-  sleep 1
-done
-(exec 3<>"/dev/tcp/127.0.0.1/${LOCAL_PORT}") 2>/dev/null || { echo "Error: tunnel not ready after 60s." >&2; exit 1; }
-
-read -r RDS_HOST RDS_DB < <(aws rds describe-db-instances --region "$REGION" \
-  --db-instance-identifier "${ENVIRONMENT}-database" \
-  --query "DBInstances[0].[Endpoint.Address,DBName]" --output text)
-
-export ENVIRONMENT AWS_REGION="$REGION"
-# Stop the root .env's placeholder AWS keys (loaded by common.settings) overriding the SSO session.
-export AWS_ACCESS_KEY_ID="" AWS_SECRET_ACCESS_KEY="" AWS_SESSION_TOKEN=""
-export POSTGRES_HOST="${POSTGRES_HOST:-$RDS_HOST}"
-export POSTGRES_DB="${POSTGRES_DB:-${RDS_DB/None/postgres}}"
-export POSTGRES_USER="${POSTGRES_USER:-postgres}"
-export POSTGRES_HOSTADDR=127.0.0.1 POSTGRES_PORT="$LOCAL_PORT" POSTGRES_IAM_PORT=5432
-export RDS_CA_BUNDLE_PATH="${RDS_CA_BUNDLE_PATH:-${XDG_CACHE_HOME:-$HOME/.cache}/local-transcribe/rds-ca-bundle-${REGION}.pem}"
+# shellcheck source=../_tunnel_lib.sh
+source "$ROOT/reporting/_tunnel_lib.sh"
+open_tunnel_and_export_env
 
 cd "$ROOT"
 poetry run python -m reporting.analytics_events

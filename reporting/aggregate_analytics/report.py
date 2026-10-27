@@ -1,5 +1,4 @@
 import argparse
-import csv
 import json
 import os
 import re
@@ -23,6 +22,7 @@ from reporting.aggregate_analytics.measures import (
     RatioMeasure,
 )
 from reporting.aggregate_analytics.sources import MonthlyCounts, count_event, monthly_counts
+from reporting.csv_output import write_csv
 
 Row = dict[str, object]
 
@@ -134,18 +134,10 @@ def write_csv_reports(report: list[dict[str, object]], output_dir: Path = OUTPUT
     Each measure's rows share one set of columns (e.g. ratio measures have numerator/denominator/percentage,
     monthly measures have month/count), so they are written as separate files rather than one combined CSV.
     """
-    output_dir.mkdir(parents=True, exist_ok=True)
-    paths = []
-    for entry in report:
-        rows: list[Row] = entry["rows"]  # type: ignore[assignment]
-        path = output_dir / f"{slugify(str(entry['measure']))}.csv"
-        with path.open("w", newline="") as f:
-            if rows:
-                writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
-                writer.writeheader()
-                writer.writerows(rows)
-        paths.append(path)
-    return paths
+    return [
+        write_csv(entry["rows"], output_dir / f"{slugify(str(entry['measure']))}.csv")  # type: ignore[arg-type]
+        for entry in report
+    ]
 
 
 ENV_FILES = (Path(__file__).parent / ".env", REPO_ROOT / ".env")
